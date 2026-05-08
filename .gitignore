@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+env/
+venv/
+.vscode/
+
+# FastAPI uploads (optional, recommended to ignore)
+backend/uploads/
+
+# Node
+node_modules/
+dist/
+build/
+
+# OS
+.DS_Store
