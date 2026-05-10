@@ -1,6 +1,7 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, UploadFile, File, HTTPException
 
 from services.extractor import extract_text
+from services.parser import parse_resume
 from utils.file_handler import save_uploaded_file
 
 router = APIRouter()
@@ -16,11 +17,14 @@ async def upload_resume(
         # SAVE FILE
         file_path, content = await save_uploaded_file(file)
 
-        # EXTRACT TEXT
+        # EXTRACT RAW TEXT
         extracted_text = extract_text(
-            file_path,
-            file.filename
+            file_path=file_path,
+            file_name=file.filename
         )
+
+        # PARSE RESUME
+        parsed_data = parse_resume(extracted_text)
 
         return {
 
@@ -30,13 +34,14 @@ async def upload_resume(
 
             "size": len(content),
 
-            "saved_path": file_path,
+            "parsed_data": parsed_data,
 
-            "extracted_text": extracted_text[:3000]
+            "preview_text": extracted_text[:1000]
         }
 
     except Exception as e:
 
-        return {
-            "error": str(e)
-        }
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )

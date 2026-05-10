@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routes.resume import router as resume_router
+from routes.job import router as job_router
 
 app = FastAPI()
 
@@ -26,3 +27,5 @@ def home():
 
 # ROUTES
 app.include_router(resume_router)
+
+app.include_router(job_router)

@@ -3,10 +3,24 @@ import uuid
 
 UPLOAD_DIR = "uploads"
 
+ALLOWED_EXTENSIONS = [".pdf", ".docx", ".txt"]
+
+MAX_FILE_SIZE = 5 * 1024 * 1024
+
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 async def save_uploaded_file(file):
+
+    ext = os.path.splitext(file.filename)[1].lower()
+
+    if ext not in ALLOWED_EXTENSIONS:
+        raise Exception("Unsupported file type")
+
+    content = await file.read()
+
+    if len(content) > MAX_FILE_SIZE:
+        raise Exception("File size exceeds limit")
 
     file_id = str(uuid.uuid4())
 
@@ -16,9 +30,6 @@ async def save_uploaded_file(file):
     )
 
     with open(file_path, "wb") as f:
-
-        content = await file.read()
-
         f.write(content)
 
     return file_path, content
