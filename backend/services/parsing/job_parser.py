@@ -1,7 +1,7 @@
 import re
 
 from core.normalization import normalize_text
-from services.skill_extractor import extract_skills
+from services.ai.skill_extractor import extract_skills
 from core.stopwords import STOPWORDS
 
 def extract_experience_requirement(text: str):
@@ -64,6 +64,8 @@ def extract_context_terms(text: str):
 
         # remove skills from context
         if w in skills:
+            continue
+        if w == "years":
             continue
 
         context_terms.add(w)

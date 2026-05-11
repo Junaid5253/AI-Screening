@@ -1,7 +1,7 @@
-from services.section_parser import extract_sections
-from services.skill_extractor import extract_skills
-from services.education_extractor import extract_education
-from services.experience_extractor import extract_experience
+from services.parsing.section_parser import extract_sections
+from services.ai.skill_extractor import extract_skills
+from services.ai.extractor.education_extractor import extract_education
+from services.ai.extractor.experience_extractor import extract_experience
 
 
 def parse_resume(text: str):
