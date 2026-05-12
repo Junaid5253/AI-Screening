@@ -2,9 +2,9 @@ from models import Resume
 from utils.file_handler import delete_uploaded_file
 
 
-def save_resume(db,filename,file_path,parsed_data,raw_text,user_id=None):
+def save_resume(db, filename, file_path, parsed_data, raw_text, user_id=None, file_size=None):
 
-    resume = Resume(user_id=user_id,filename=filename,file_path=file_path,skills=parsed_data.get("skills",[]),
+    resume = Resume(user_id=user_id,filename=filename,file_path=file_path,file_size=file_size,skills=parsed_data.get("skills",[]),
                     education=parsed_data.get("education",[]),
                     experience_years=parsed_data.get("experience_years",0),raw_text=raw_text,
                     candidate_name=parsed_data.get("name"),candidate_email=parsed_data.get("email"),candidate_phone=parsed_data.get("phone"),

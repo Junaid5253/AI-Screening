@@ -33,9 +33,12 @@ class Resume(Base):
     # FILE INFO
     filename = Column(String)
 
+    file_size = Column(Integer)
+    
     file_path = Column(String)
 
     raw_text = Column(Text)
+
 
     # CANDIDATE INFO
     candidate_name = Column(String)

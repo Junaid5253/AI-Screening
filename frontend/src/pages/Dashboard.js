@@ -65,10 +65,7 @@ export default function Dashboard() {
             <Search size={16} />
             Find Candidate
           </button>
-          <button className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">
-            <UserPlus size={50} />
-            Add New Job
-          </button>
+          
         </div>
       </div>
 

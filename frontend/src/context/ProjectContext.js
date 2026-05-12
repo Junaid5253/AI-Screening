@@ -144,6 +144,26 @@ export const ProjectProvider = ({ children }) => {
       );
 
       const data = await response.json();
+      // filesize converted function
+      const formatSize = (bytes) => {
+      if (!bytes && bytes !== 0) return "UNKNOWN";
+
+      const kb = bytes / 1024;
+      if (kb < 1024) return kb.toFixed(2) + " KB";
+
+      const mb = kb / 1024;
+      return mb.toFixed(2) + " MB";
+      };
+
+      const getFileType = (filename) => {
+      const ext = filename.split('.').pop().toLowerCase();
+
+      if (ext === 'pdf') return 'application/pdf';
+      if (ext === 'doc' || ext === 'docx') return 'application/msword';
+      if (ext === 'txt') return 'text/plain';
+
+      return 'unknown';
+      };
 
       if (data.success) {
         // Convert backend data to frontend format
@@ -151,8 +171,8 @@ export const ProjectProvider = ({ children }) => {
           id: crypto.randomUUID(),
           resume_id: resume.id,
           name: resume.filename,
-          size: 'Unknown', // Backend doesn't store size
-          type: 'application/pdf', // Assume PDF
+          size: formatSize(resume.file_size)  , 
+          type: getFileType(resume.filename),
           uploadedAt: new Date().toISOString(),
           status: 'Uploaded'
         }));

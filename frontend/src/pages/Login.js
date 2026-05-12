@@ -18,9 +18,9 @@ export default function Login() {
       const response = await fetch('http://127.0.0.1:8000/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: new URLSearchParams({
+        body: JSON.stringify({
           email: email,
           password: password,
         }),
@@ -28,12 +28,13 @@ export default function Login() {
 
       const data = await response.json();
 
-      if (data.access_token) {
+      if (response.ok && data.access_token) {
         localStorage.setItem('token', data.access_token);
         navigate('/dashboard');
       } else {
-        setError('Invalid credentials');
+        setError(data.detail || 'Invalid credentials');
       }
+
     } catch (err) {
       setError('Login failed');
     } finally {
@@ -133,22 +134,24 @@ export default function Login() {
             )}
           </form>
 
+          <div className="mt-6 text-center text-sm text-slate-600">
+            Don't have an account?{" "}
+            <button
+              onClick={() => navigate('/signup')}
+              className="font-bold text-indigo-600 hover:text-indigo-500"
+            >
+              Sign up
+            </button>
+          </div>
+
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-100"></div>
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-slate-500 font-medium">Or continue with</span>
-              </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-1 gap-3">
-              <button className="w-full inline-flex justify-center py-3 px-4 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all">
-                <Github size={20} className="mr-2" />
-                Sign in with GitHub
-              </button>
-            </div>
+
           </div>
         </div>
         <p className="mt-8 text-center text-xs text-slate-400">

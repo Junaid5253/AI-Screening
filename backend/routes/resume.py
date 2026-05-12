@@ -1,5 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, Depends
 from sqlalchemy.orm import Session
+import os
+from fastapi import HTTPException
 
 from database import get_db
 
@@ -57,7 +59,9 @@ async def upload_resume(
 
             raw_text=extracted_text,
 
-            user_id=current_user.id
+            user_id=current_user.id,
+
+            file_size = os.path.getsize(file_path)
         )
 
         return {
@@ -116,6 +120,8 @@ def fetch_resumes(
 
             "filename": r.filename,
 
+            "file_size" : r.file_size,
+
             "candidate_name": r.candidate_name,
 
             "candidate_email": r.candidate_email,
@@ -159,10 +165,11 @@ def delete_resume_endpoint(
     ).first()
 
     if not resume:
-        return {
-            "success": False,
-            "error": "Resume not found or not owned by user"
-        }
+        
+        raise HTTPException(
+            status_code=404,
+            detail="Resume not found or not owned by user"
+        )
 
     delete_resume(db, resume_id)
 

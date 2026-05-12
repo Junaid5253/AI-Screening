@@ -16,6 +16,8 @@ import ResumeUpload from './pages/ResumeUpload';
 import JobDescription from './pages/JobDescription';
 import Ranking from './pages/Ranking';
 import Login from './pages/Login';
+import Signup from './pages/Signup';
+
 
 const Layout = ({ children }) => {
   return (
@@ -53,7 +55,7 @@ function App() {
 
           {/* PUBLIC ROUTES */}
           <Route path="/login" element={<Login />} />
-
+          <Route path="/signup" element={<Signup />} />
           {/* PROTECTED ROUTES */}
           <Route
             path="/dashboard"
@@ -100,9 +102,8 @@ function App() {
           />
 
           {/* DEFAULT ROUTES */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
 
         </Routes>
       </Router>

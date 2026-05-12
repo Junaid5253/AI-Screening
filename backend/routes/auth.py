@@ -7,16 +7,25 @@ from models.user import User
 from services.auth.security import hash_password, verify_password
 from services.auth.jwt import create_access_token
 
+
+from pydantic import BaseModel
+
 router = APIRouter()
 
 
+class RegisterRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+
+
 @router.post("/register")
-def register(name: str, email: str, password: str, db: Session = Depends(get_db)):
+def register(data: RegisterRequest, db: Session = Depends(get_db)):
 
     user = User(
-        name=name,
-        email=email,
-        password=hash_password(password)
+        name=data.name,
+        email=data.email,
+        password=hash_password(data.password)
     )
 
     db.add(user)
@@ -24,18 +33,17 @@ def register(name: str, email: str, password: str, db: Session = Depends(get_db)
     db.refresh(user)
 
     return {"success": True, "user_id": user.id}
+class LoginRequest(BaseModel):
+    email: str
+    password: str
 
 
 @router.post("/login")
-def login(
-    email: str = Form(...),
-    password: str = Form(...),
-    db: Session = Depends(get_db)
-):
+def login(data: LoginRequest, db: Session = Depends(get_db)):
 
-    user = db.query(User).filter(User.email == email).first()
+    user = db.query(User).filter(User.email == data.email).first()
 
-    if not user or not verify_password(password, user.password):
+    if not user or not verify_password(data.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     token = create_access_token({"user_id": user.id})
