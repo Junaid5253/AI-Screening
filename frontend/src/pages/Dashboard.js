@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Users, FileCheck, ClipboardList, TrendingUp, Search, UserPlus } from 'lucide-react';
 import Card from '../components/Common/Card';
 import { 
@@ -26,7 +26,11 @@ const activityData = [
 ];
 
 export default function Dashboard() {
-  const { resumes, rankings } = useProject();
+  const { resumes, rankings, fetchResumes } = useProject();
+
+  useEffect(() => {
+    fetchResumes();
+  }, []);
 
   const chartData = [
     { range: '90-100%', count: rankings.filter(r => r.score >= 90).length },

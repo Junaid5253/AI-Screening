@@ -1,17 +1,51 @@
+# =====================
 # Python
+# =====================
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
 env/
 venv/
-.vscode/
+.env
+.env.*
 
-# FastAPI uploads (optional, recommended to ignore)
+# =====================
+# SQLite / Databases
+# =====================
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# =====================
+# FastAPI / Backend uploads
+# =====================
 backend/uploads/
+uploads/
 
-# Node
+# =====================
+# Logs
+# =====================
+*.log
+logs/
+
+# =====================
+# VS Code / IDE
+# =====================
+.vscode/
+.idea/
+
+# =====================
+# Node / Frontend
+# =====================
 node_modules/
 dist/
 build/
 
-# OS
+# =====================
+# OS files
+# =====================
 .DS_Store
+Thumbs.db

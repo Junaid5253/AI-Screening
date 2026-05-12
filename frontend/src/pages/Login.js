@@ -6,14 +6,39 @@ export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('admin@hiresense.ai');
   const [password, setPassword] = useState('password123');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
 
-    // temporary fake auth
-    localStorage.setItem('token', 'demo-token');
+    try {
+      const response = await fetch('http://127.0.0.1:8000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          email: email,
+          password: password,
+        }),
+      });
 
-    navigate('/dashboard');
+      const data = await response.json();
+
+      if (data.access_token) {
+        localStorage.setItem('token', data.access_token);
+        navigate('/dashboard');
+      } else {
+        setError('Invalid credentials');
+      }
+    } catch (err) {
+      setError('Login failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -93,12 +118,19 @@ export default function Login() {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg shadow-indigo-100 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
+                disabled={loading}
+                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg shadow-indigo-100 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all disabled:opacity-50"
               >
-                Sign in
+                {loading ? 'Signing in...' : 'Sign in'}
                 <ArrowRight size={18} />
               </button>
             </div>
+
+            {error && (
+              <div className="mt-4 bg-rose-50 border border-rose-100 p-3 rounded-xl">
+                <p className="text-sm text-rose-700 font-medium">{error}</p>
+              </div>
+            )}
           </form>
 
           <div className="mt-6">

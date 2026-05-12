@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 
 export default function JobDescription() {
   const navigate = useNavigate();
-  const { jobDescription, setJobDescription } = useProject();
+  const { jobDescription, setJobDescription, saveJobDescription, loading } = useProject();
 
   const handleApplySample = () => {
     setJobDescription(`We are looking for a Senior Frontend Engineer to join our dynamic team. 
@@ -78,11 +78,16 @@ The ideal candidate should have:
           </button>
           
           <button 
-            disabled={!jobDescription.trim()}
-            onClick={() => navigate('/results')}
+            disabled={!jobDescription.trim() || loading}
+            onClick={async () => {
+              const saved = await saveJobDescription();
+              if (saved) {
+                navigate('/results');
+              }
+            }}
             className="flex items-center gap-2 bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-100"
           >
-            Preview Analysis
+            {loading ? 'Saving job...' : 'Preview Analysis'}
             <ArrowRight size={18} />
           </button>
         </div>

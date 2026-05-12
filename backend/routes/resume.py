@@ -3,15 +3,19 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 
+from models.resume import Resume
+
 from utils.file_handler import save_uploaded_file
 
-from services.utils.extractor import extract_text
+from utils.extractor import extract_text
 
 from services.parsing.parser import parse_resume
+from services.auth.deps import get_current_user
 
 from services.ingestion.resume_service import (
     save_resume,
-    get_all_resumes
+    get_all_resumes,
+    delete_resume
 )
 
 router = APIRouter()
@@ -22,7 +26,8 @@ async def upload_resume(
 
     file: UploadFile = File(...),
 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
 
     try:
@@ -50,7 +55,9 @@ async def upload_resume(
 
             parsed_data=parsed_data,
 
-            raw_text=extracted_text
+            raw_text=extracted_text,
+
+            user_id=current_user.id
         )
 
         return {
@@ -62,6 +69,16 @@ async def upload_resume(
             "filename": resume.filename,
 
             "parsed_data": {
+
+                "candidate_name": resume.candidate_name,
+
+                "candidate_email": resume.candidate_email,
+
+                "candidate_phone": resume.candidate_phone,
+
+                "github": resume.github,
+
+                "linkedin": resume.linkedin,
 
                 "skills": resume.skills,
 
@@ -82,10 +99,12 @@ async def upload_resume(
 @router.get("/resumes")
 def fetch_resumes(
 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+
+    current_user = Depends(get_current_user)
 ):
 
-    resumes = get_all_resumes(db)
+    resumes = get_all_resumes(db, user_id=current_user.id)
 
     data = []
 
@@ -96,6 +115,16 @@ def fetch_resumes(
             "id": r.id,
 
             "filename": r.filename,
+
+            "candidate_name": r.candidate_name,
+
+            "candidate_email": r.candidate_email,
+
+            "candidate_phone": r.candidate_phone,
+
+            "github": r.github,
+
+            "linkedin": r.linkedin,
 
             "skills": r.skills,
 
@@ -111,4 +140,33 @@ def fetch_resumes(
         "count": len(data),
 
         "resumes": data
+    }
+
+
+@router.delete("/resumes/{resume_id}")
+def delete_resume_endpoint(
+
+    resume_id: int,
+
+    db: Session = Depends(get_db),
+
+    current_user = Depends(get_current_user)
+):
+
+    resume = db.query(Resume).filter(
+        Resume.id == resume_id,
+        Resume.user_id == current_user.id
+    ).first()
+
+    if not resume:
+        return {
+            "success": False,
+            "error": "Resume not found or not owned by user"
+        }
+
+    delete_resume(db, resume_id)
+
+    return {
+        "success": True,
+        "message": "Resume deleted successfully"
     }

@@ -1,4 +1,4 @@
-from models.job import Job
+from models import Job
 
 
 def save_job(

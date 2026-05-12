@@ -33,3 +33,11 @@ async def save_uploaded_file(file):
         f.write(content)
 
     return file_path, content
+
+
+def delete_uploaded_file(file_path: str):
+    if file_path and os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+        except OSError:
+            pass

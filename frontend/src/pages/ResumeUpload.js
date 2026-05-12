@@ -7,7 +7,14 @@ import { motion } from 'framer-motion';
 
 export default function ResumeUpload() {
   const navigate = useNavigate();
-  const { resumes } = useProject();
+  const { resumes, uploadStagedResumes, loading } = useProject();
+
+  const handleContinue = async () => {
+    const success = await uploadStagedResumes();
+    if (success) {
+      navigate('/job-description');
+    }
+  };
 
   return (
     <motion.div 
@@ -45,11 +52,11 @@ export default function ResumeUpload() {
         
         <div className="mt-10 pt-8 border-t border-slate-100 flex justify-end">
           <button 
-            disabled={resumes.length === 0}
-            onClick={() => navigate('/job-description')}
+            disabled={resumes.length === 0 || loading}
+            onClick={handleContinue}
             className="flex items-center gap-2 bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-100"
           >
-            Continue to Job Description
+            {loading ? 'Saving resumes...' : 'Continue to Job Description'}
             <ArrowRight size={18} />
           </button>
         </div>

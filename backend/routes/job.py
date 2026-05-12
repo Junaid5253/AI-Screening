@@ -13,7 +13,7 @@ from services.ingestion.job_service import (
 
     get_all_jobs
 )
-
+from services.auth.deps import get_current_user
 router = APIRouter()
 
 
@@ -22,7 +22,9 @@ def create_job(
 
     payload: JobCreateRequest,
 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+
+    current_user = Depends(get_current_user)
 ):
 
     try:
@@ -44,7 +46,9 @@ def create_job(
 
             description=description,
 
-            parsed_job=parsed_job
+            parsed_job=parsed_job,
+
+            user_id=current_user.id
         )
 
         return {
@@ -79,10 +83,12 @@ def create_job(
 @router.get("/jobs")
 def fetch_jobs(
 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+
+    current_user = Depends(get_current_user)
 ):
 
-    jobs = get_all_jobs(db)
+    jobs = get_all_jobs(db, user_id=current_user.id)
 
     data = []
 

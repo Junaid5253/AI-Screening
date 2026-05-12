@@ -1,13 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes.resume import router as resume_router
-from routes.job import router as job_router
+from routes import resume, auth, job
+
+from database import Base, engine
+import models  # IMPORTANT: registers all tables
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,16 +18,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
+app.include_router(resume.router)
+app.include_router(job.router)
+
 
 @app.get("/")
 def home():
-
-    return {
-        "message": "Backend is running successfully"
-    }
-
-
-# ROUTES
-app.include_router(resume_router)
-
-app.include_router(job_router)
+    return {"message": "Backend running"}

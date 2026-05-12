@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, JSON
+from sqlalchemy import Column, Integer, String, Text, JSON, ForeignKey
 
 from database import Base
 
@@ -15,7 +15,7 @@ class Job(Base):
 
     user_id = Column(
         Integer,
-        nullable=True
+        ForeignKey("users.id")
     )
 
     title = Column(String)
