@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes import resume, auth, job
+from routes import resume, auth, job, ranking
 
 from database import Base, engine
 import models  # IMPORTANT: registers all tables
@@ -21,6 +21,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(resume.router)
 app.include_router(job.router)
+app.include_router(ranking.router)
 
 
 @app.get("/")

@@ -7,22 +7,27 @@ import {
   ExternalLink, 
   AlertCircle,
   Loader2,
-  CheckCircle2
+  CheckCircle2,
+  Sparkles,
+  BrainCircuit
 } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Ranking() {
-  const { resumes, jobDescription, rankings, processRankings, loading, error, resetData } = useProject();
+  const { resumes, jobDescription, currentJobId, rankings, processRankings, loading, error, resetData } = useProject();
   const navigate = useNavigate();
   const [hasStarted, setHasStarted] = useState(false);
 
   useEffect(() => {
     if (resumes.length === 0) {
       navigate('/upload');
+      return;
     }
-  }, [resumes, navigate]);
+
+    
+  }, [resumes.length, rankings.length, hasStarted, currentJobId, jobDescription, navigate, processRankings]);
 
   const handleStartAnalysis = async () => {
     setHasStarted(true);
@@ -34,6 +39,46 @@ export default function Ranking() {
       resetData();
       navigate('/upload');
     }
+  };
+
+  const handleExportCSV = () => {
+    if (rankings.length === 0) {
+      return;
+    }
+
+    // Create CSV header
+    const headers = ['Rank', 'Candidate Name', 'Match Score', 'Similarity Score', 'Skill Score', 'Experience Score', 'Experience', 'Status'];
+    
+    // Create CSV rows
+    const rows = rankings.map(candidate => [
+      candidate.rank,
+      candidate.name,
+      `${candidate.score}%`,
+      `${candidate.similarity_score}%`,
+      `${candidate.skill_score}%`,
+      `${candidate.experience_score}%`,
+      candidate.experience,
+      candidate.status
+    ]);
+
+    // Combine headers and rows
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `rankings-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -62,7 +107,10 @@ export default function Ranking() {
             </button>
           )}
           {rankings.length > 0 && (
-            <button className="flex items-center gap-2 bg-emerald-600 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100">
+            <button 
+              onClick={handleExportCSV}
+              className="flex items-center gap-2 bg-emerald-600 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100"
+            >
               <Download size={16} />
               Export CSV
             </button>
@@ -204,33 +252,7 @@ export default function Ranking() {
         </motion.div>
       )}
 
-      {rankings.length > 0 && (
-         <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-amber-50 border border-amber-100 p-6 rounded-2xl space-y-3">
-              <div className="flex items-center gap-2 text-amber-800 font-bold">
-                <Star size={18} />
-                AI Conclusion
-              </div>
-              <p className="text-sm text-amber-700 leading-relaxed">
-                <span className="font-bold">{rankings[0].name}</span> is the strongest candidate, showing 90%+ alignment with your React and Node.js requirements. Recommend moving to the Technical Interview stage.
-              </p>
-            </div>
-            
-            <div className="md:col-span-2 bg-indigo-900 p-8 rounded-2xl text-white relative overflow-hidden">
-               <div className="relative z-10">
-                 <h3 className="text-xl font-bold">Refine your Search</h3>
-                 <p className="text-indigo-200 mt-2 text-sm leading-relaxed max-w-lg">
-                   Want to filter by specific experience? You can update the job description or add specific filters to focus on preferred candidates.
-                 </p>
-                 <button className="mt-6 bg-white text-indigo-900 px-6 py-2 rounded-xl font-bold text-sm hover:bg-slate-100 transition-colors">
-                   Update Job Spec
-                 </button>
-               </div>
-               <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-indigo-800 rounded-full opacity-50 blur-3xl"></div>
-               <BrainCircuit className="absolute right-8 top-8 text-indigo-800" size={100} />
-            </div>
-         </div>
-      )}
+
     </div>
   );
 }

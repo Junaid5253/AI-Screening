@@ -20,12 +20,19 @@ def save_resume(db, filename, file_path, parsed_data, raw_text, user_id=None, fi
 
 
 
-def get_resume_by_id(db, resume_id):
+def get_resume_by_id(db,resume_id,user_id=None):
 
-    return db.query(Resume).filter(
+    query = db.query(Resume).filter(
         Resume.id == resume_id
-    ).first()
+    )
 
+    if user_id is not None:
+
+        query = query.filter(
+            Resume.user_id == user_id
+        )
+
+    return query.first()
 
 
 def get_all_resumes(db, user_id=None):
@@ -43,11 +50,19 @@ def get_all_resumes(db, user_id=None):
 
 
 
-def delete_resume(db, resume_id):
+def delete_resume(db,resume_id,user_id=None):
 
-    resume = db.query(Resume).filter(
+    query = db.query(Resume).filter(
         Resume.id == resume_id
-    ).first()
+    )
+
+    if user_id is not None:
+
+        query = query.filter(
+            Resume.user_id == user_id
+        )
+
+    resume = query.first()
 
     if not resume:
         return None

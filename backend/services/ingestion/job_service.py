@@ -48,11 +48,19 @@ def save_job(
 
 
 
-def get_job_by_id(db, job_id):
+def get_job_by_id(db,job_id,user_id=None):
 
-    return db.query(Job).filter(
+    query = db.query(Job).filter(
         Job.id == job_id
-    ).first()
+    )
+
+    if user_id is not None:
+
+        query = query.filter(
+            Job.user_id == user_id
+        )
+
+    return query.first()
 
 
 
@@ -71,11 +79,19 @@ def get_all_jobs(db, user_id=None):
 
 
 
-def delete_job(db, job_id):
+def delete_job(db,job_id,user_id=None):
 
-    job = db.query(Job).filter(
+    query = db.query(Job).filter(
         Job.id == job_id
-    ).first()
+    )
+
+    if user_id is not None:
+
+        query = query.filter(
+            Job.user_id == user_id
+        )
+
+    job = query.first()
 
     if not job:
         return None
@@ -85,3 +101,25 @@ def delete_job(db, job_id):
     db.commit()
 
     return job
+
+
+def get_user_job(db, user_id):
+    """Get the user's current job (latest one)"""
+    job = db.query(Job).filter(
+        Job.user_id == user_id
+    ).order_by(Job.id.desc()).first()
+    
+    return job
+
+
+def delete_user_jobs(db, user_id):
+    """Delete all jobs for a user"""
+    jobs = db.query(Job).filter(
+        Job.user_id == user_id
+    ).all()
+    
+    for job in jobs:
+        db.delete(job)
+    
+    db.commit()
+    return len(jobs)

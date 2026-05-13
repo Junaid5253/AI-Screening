@@ -8,10 +8,10 @@ from models.job_request import JobCreateRequest
 from services.parsing.job_parser import parse_job
 
 from services.ingestion.job_service import (
-
     save_job,
-
-    get_all_jobs
+    get_all_jobs,
+    get_user_job,
+    delete_user_jobs
 )
 from services.auth.deps import get_current_user
 router = APIRouter()
@@ -33,6 +33,9 @@ def create_job(
 
         description = payload.description
         
+
+        # Delete previous jobs (keep only one per user)
+        delete_user_jobs(db, current_user.id)
 
         # PARSE JOB
         parsed_job = parse_job(description)
@@ -76,6 +79,44 @@ def create_job(
             "success": False,
 
             "error": str(e)
+        }
+
+
+
+@router.get("/current-job")
+def get_current_job(
+
+    db: Session = Depends(get_db),
+
+    current_user = Depends(get_current_user)
+):
+    """Get the user's current job description"""
+    try:
+        job = get_user_job(db, current_user.id)
+
+        if not job:
+            return {
+                "success": False,
+                "message": "No job description saved",
+                "job": None
+            }
+
+        return {
+            "success": True,
+            "job": {
+                "id": job.id,
+                "title": job.title,
+                "description": job.description,
+                "required_skills": job.required_skills,
+                "experience_required": job.experience_required,
+                "context_terms": job.context_terms
+            }
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "job": None
         }
 
 

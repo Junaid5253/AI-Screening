@@ -48,6 +48,7 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
+  console.log('App component rendered');
   return (
     <ProjectProvider>
       <Router>

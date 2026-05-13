@@ -1,6 +1,7 @@
 import React, {
   createContext,
   useContext,
+  useEffect,
   useState
 } from 'react';
 
@@ -10,13 +11,53 @@ export const ProjectProvider = ({ children }) => {
 
   const [resumes, setResumes] = useState([]);
 
-  const [jobDescription, setJobDescription] = useState('');
+  const [jobDescription, internalSetJobDescription] = useState('');
+
+  const [currentJobId, setCurrentJobId] = useState(() => {
+    const stored = localStorage.getItem('currentJobId');
+    return stored ? Number(stored) : null;
+  });
 
   const [rankings, setRankings] = useState([]);
 
   const [loading, setLoading] = useState(false);
 
   const [error, setError] = useState(null);
+
+  // Fetch user's job description on mount
+  useEffect(() => {
+    const fetchUserJob = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const response = await fetch(
+          'http://127.0.0.1:8000/current-job',
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+
+        const data = await response.json();
+
+        if (data.success && data.job) {
+          internalSetJobDescription(data.job.description);
+          setCurrentJobId(data.job.id);
+          localStorage.setItem('currentJobId', String(data.job.id));
+        }
+      } catch (err) {
+        console.error('Failed to fetch job description:', err);
+      }
+    };
+
+    fetchUserJob();
+  }, []);
+
+  const setJobDescription = (value) => {
+    internalSetJobDescription(value);
+  };
 
   // ADD RESUMES
   const addResumes = async (newFiles) => {
@@ -232,13 +273,68 @@ export const ProjectProvider = ({ children }) => {
       const jobData = await response.json();
       if (!jobData.success) {
         setError(jobData.error || 'Failed to save job description');
-        return false;
+        return null;
       }
 
-      return true;
+      setCurrentJobId(jobData.job_id);
+      localStorage.setItem('currentJobId', String(jobData.job_id));
+
+      return jobData;
     } catch (err) {
       console.error(err);
       setError('Failed to save job description.');
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchRankings = async (jobId) => {
+    if (!jobId) {
+      setError('No job selected for ranking.');
+      return false;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/rank/${jobId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+
+      const data = await response.json();
+
+      if (!data.success) {
+        setError(data.error || 'Failed to fetch rankings.');
+        setRankings([]);
+        return false;
+      }
+
+      const mappedRankings = data.rankings.map((item, idx) => ({
+        id: item.resume_id,
+        name: item.candidate_name,
+        score: item.final_score,
+        similarity_score: item.similarity_score,
+        skill_score: item.skill_score,
+        experience_score: item.experience_score,
+        experience: item.experience_years != null ? `${item.experience_years} yrs` : `${item.experience_score}%`,
+        skills: item.skills || [],
+        rank: idx + 1,
+        status: item.final_score >= 90 ? 'Highly Recommended' : item.final_score >= 70 ? 'Shortlisted' : 'Review'
+      }));
+
+      setRankings(mappedRankings);
+      return true;
+    } catch (err) {
+      console.error(err);
+      setError('Failed to fetch rankings.');
+      setRankings([]);
       return false;
     } finally {
       setLoading(false);
@@ -246,74 +342,57 @@ export const ProjectProvider = ({ children }) => {
   };
 
   const processRankings = async () => {
-    const saved = await saveJobDescription();
-    if (!saved) {
+    if (!currentJobId) {
+      const jobData = await saveJobDescription();
+      if (!jobData) {
+        return;
+      }
+
+      await fetchRankings(jobData.job_id);
       return;
     }
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      console.log('READY FOR BACKEND API');
-
-      /*
-        LATER:
-
-        1. Upload resumes
-        2. Send job description
-        3. Backend returns rankings
-      */
-
-      setRankings([]);
-    } catch (err) {
-      setError('Failed to process rankings.');
-    } finally {
-      setLoading(false);
-    }
+    await fetchRankings(currentJobId);
   };
 
   // RESET
   const resetData = () => {
-
     setResumes([]);
-
     setRankings([]);
-
-    setJobDescription('');
-
+    internalSetJobDescription('');
+    setCurrentJobId(null);
     setError(null);
+    localStorage.removeItem('currentJobId');
+  };
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    resetData();
   };
 
   return (
     <ProjectContext.Provider
       value={{
-
         resumes,
         setResumes,
-
         addResumes,
         uploadStagedResumes,
         saveJobDescription,
         removeResume,
         fetchResumes,
-
         jobDescription,
         setJobDescription,
-
         rankings,
         setRankings,
-
+        currentJobId,
         processRankings,
-
+        fetchRankings,
         loading,
         setLoading,
-
         error,
         setError,
-
-        resetData
-
+        resetData,
+        logout
       }}
     >
       {children}

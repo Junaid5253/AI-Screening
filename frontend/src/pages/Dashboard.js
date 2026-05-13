@@ -39,15 +39,7 @@ export default function Dashboard() {
     { range: 'Below 70%', count: rankings.filter(r => r.score < 70).length },
   ];
 
-  // If no rankings, use dummy data for visualization preview
-  const displayChartData = rankings.length > 0 
-    ? chartData 
-    : [
-      { range: '90-100%', count: 4 },
-      { range: '80-89%', count: 7 },
-      { range: '70-79%', count: 5 },
-      { range: 'Below 70%', count: 2 },
-    ];
+  const displayChartData = chartData;
 
   return (
     <motion.div 
@@ -70,10 +62,10 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card title="Total Resumes" value={resumes.length || "24"} icon={Users} trend="12" />
-        <Card title="Ranked" value={rankings.length || "18"} icon={FileCheck} trend="8" />
-        <Card title="Avg. Match" value={rankings.length > 0 ? `${Math.floor(rankings.reduce((acc, curr) => acc + curr.score, 0) / rankings.length)}%` : "74%"} icon={TrendingUp} trend="5" />
-        <Card title="Active Specs" value="3" icon={ClipboardList} description="Job descriptions ready" />
+        <Card title="Total Resumes" value={resumes.length} icon={Users} trend="12" />
+        <Card title="Ranked" value={rankings.length} icon={FileCheck} trend="8" />
+        <Card title="Avg. Match" value={rankings.length > 0 ? `${Math.floor(rankings.reduce((acc, curr) => acc + curr.score, 0) / rankings.length)}%` : "0%"} icon={TrendingUp} trend="5" />
+        <Card title="Active Specs" value={rankings.length > 0 ? 1 : 0} icon={ClipboardList} description="Job descriptions ready" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
