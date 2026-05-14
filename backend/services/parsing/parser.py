@@ -1,5 +1,5 @@
 from services.parsing.section_parser import extract_sections
-from services.ai.skill_extractor import extract_skills
+from services.ai.extractor.skill_extractor import extract_skills
 from services.ai.extractor.education_extractor import extract_education
 from services.ai.extractor.experience_extractor import extract_experience
 from services.ai.extractor.contact_extractor import extract_contact_info

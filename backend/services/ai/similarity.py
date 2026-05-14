@@ -17,8 +17,7 @@ def calculate_similarity(job_text, resume_text):
     return round(float(similarity) * 100, 2)
 
 
-def calculate_experience_score(
-required_experience,candidate_experience):
+def calculate_experience_score(required_experience,candidate_experience):
 
     if candidate_experience >= required_experience:
         return 100
